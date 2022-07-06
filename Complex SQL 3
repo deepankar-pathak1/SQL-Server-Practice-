@@ -1,0 +1,26 @@
+select *from [dbo].[entries]
+
+with distinct_resources as (
+select distinct name,resources 
+from 
+entries
+) 
+,agg_res as (
+select name,STRING_AGG(resources,',') as resources_, count(1) as total_visited_ from distinct_resources group by name
+)
+,visiter_count as (select name,count(1) as Total_Visitor from entries group by name)
+,final as(select 
+name,count(1) as total_visit, 
+floor as Most_Visited_Floor, 
+rank() Over(Partition by name order by count(1) desc) rn 
+from [dbo].[entries]
+group by name,floor)
+select fi.name, vc.Total_Visitor, fi.Most_Visited_Floor,ag.resources_
+from final fi
+inner join agg_res ag on
+fi.name = ag.name
+inner join visiter_count vc 
+on fi.name = vc.name
+where rn = 1
+
+
