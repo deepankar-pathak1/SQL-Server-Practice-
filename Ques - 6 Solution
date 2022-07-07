@@ -1,0 +1,14 @@
+select * from [dbo].[freind]
+select * from [dbo].[person]
+
+with cte as (
+select fr.PersonID as Person_ID, SUm(pr.Score) as Score,count(1) as Total_count
+from freind fr
+inner join person pr 
+on fr.FreindID = pr.PersonID
+group by fr.PersonID
+having sum(pr.score) > 100)
+select p.PersonID,cte.score as total_score,cte.Total_count, p.name
+from Person p
+inner join cte
+on p.PersonID = cte.Person_ID
