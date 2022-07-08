@@ -1,0 +1,23 @@
+select * from [dbo].[matches]
+select * from [dbo].[players]
+
+with player as (
+select first_player as id, first_score as score from matches
+union all 
+select second_player as id, second_score as score from matches
+),
+player_score as(
+select id, sum(score) as score
+from player 
+group by id),
+players_group as (
+select p.group_id, ps.id, ps.score
+from player_score ps
+inner join players p 
+on ps.id = p.player_id),
+final_player as(
+select *, 
+rank() Over(Partition by group_id order by score desc,id asc) as rn
+from players_group)
+select * from final_player 
+where rn = 1
