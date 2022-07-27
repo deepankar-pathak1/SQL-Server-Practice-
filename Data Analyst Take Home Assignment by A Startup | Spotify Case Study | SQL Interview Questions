@@ -1,0 +1,70 @@
+CREATE table activity
+(
+user_id varchar(20),
+event_name varchar(20),
+event_date date,
+country varchar(20)
+);
+delete from activity;
+insert into activity values (1,'app-installed','2022-01-01','India')
+,(1,'app-purchase','2022-01-02','India')
+,(2,'app-installed','2022-01-01','USA')
+,(3,'app-installed','2022-01-01','USA')
+,(3,'app-purchase','2022-01-03','USA')
+,(4,'app-installed','2022-01-03','India')
+,(4,'app-purchase','2022-01-03','India')
+,(5,'app-installed','2022-01-03','SL')
+,(5,'app-purchase','2022-01-03','SL')
+,(6,'app-installed','2022-01-04','Pakistan')
+,(6,'app-purchase','2022-01-04','Pakistan');
+
+
+select * from activity
+-- Find the activ user each date
+select  count(distinct user_id) as user_id,event_date
+from activity
+group by event_date
+
+--3	2022-01-01
+--1	2022-01-02
+--3	2022-01-03
+--1	2022-01-04
+
+------------- Find the active user each week 
+
+select *, datepart(week,event_date)
+from activity
+--
+select count(user_id) User_Id_Count, datepart(week,event_date) as Week_Number
+from activity
+group by datepart(week,event_date)
+
+select * from activity
+
+---Date wise total number of user who made the purchase same day and insatlled the app
+
+with cte as(
+select event_date,user_id
+from activity
+group by event_date,user_id
+having count(distinct event_name) > 1)
+select count(user_id),event_date
+from cte
+group by event_date
+
+
+---------------approach-----------------
+
+select event_date,count(new_user) User_count from (
+select event_date,user_id,
+case when count(distinct event_name)= 2 then user_id else null end as new_user
+
+from activity
+group by event_date,user_id
+) a
+group by event_date
+
+
+-----------------------------
+
+-- Percentag eof paid user in India and other country should tagged as other 
