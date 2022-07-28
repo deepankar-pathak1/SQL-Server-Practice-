@@ -1,0 +1,17 @@
+select * from [dbo].[activity]
+
+with event_data as (
+select *, 
+lag(event_name,1) Over(Partition by user_id order by event_date) as prev_event,
+lag(event_date,1) over(Partition by user_id order by user_id) as prev_date
+
+from 
+[dbo].[activity]
+),
+new_data as(
+select event_date,
+case when event_name = 'app-purchase' and prev_event = 'app-installed' and DATEDIFF(day,prev_date,event_date) = 1 then user_id else Null end as new_
+from event_data 
+group by event_date,event_name,prev_event,user_id,prev_date)
+select event_date, count(new_) from new_data
+group by event_date
