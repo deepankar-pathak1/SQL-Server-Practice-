@@ -1,0 +1,26 @@
+create table business_city (
+business_date date,
+city_id int
+);
+delete from business_city;
+insert into business_city
+values(cast('2020-01-02' as date),3),(cast('2020-07-01' as date),7),(cast('2021-01-01' as date),3),(cast('2021-02-03' as date),19)
+,(cast('2022-12-01' as date),3),(cast('2022-12-15' as date),3),(cast('2022-02-28' as date),12);
+
+
+------------------------------------------------
+
+
+select * from business_city
+
+with cte as (
+select 
+DATEPART(YEAR,business_date) as year_date,city_id
+from business_city
+) 
+select 
+SUM(case when ct.year_date is null then 1 else 0 end) as cnt,ce.year_date
+from cte ce
+left join cte ct
+on ce.city_id = ct.city_id and ce.year_date > ct.year_date
+group by ce.year_date
