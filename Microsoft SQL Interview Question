@@ -1,0 +1,25 @@
+create table candidates (
+emp_id int,
+experience varchar(20),
+salary int
+);
+delete from candidates;
+insert into candidates values
+(1,'Junior',10000),(2,'Junior',15000),(3,'Junior',40000),(4,'Senior',16000),(5,'Senior',20000),(6,'Senior',50000);
+
+-------------------------------------------------------
+
+select * from [dbo].[candidates]
+
+with run_total as(
+select *,
+SUM(Salary) Over(Partition by experience order by salary asc rows between unbounded preceding and current row) as run_sal
+from [dbo].[candidates]
+),
+senior as(select * from run_total 
+where experience = 'Senior' and run_sal <= 70000) 
+select * from run_total where 
+experience = 'Junior' and run_sal <= 70000 - (select sum(salary) from senior) 
+union all 
+select * from senior
+
